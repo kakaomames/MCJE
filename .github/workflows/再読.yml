@@ -58,7 +58,8 @@ jobs:
             
             # 4. JARをダウンロード
             echo "    [DL] $JAR_URL からダウンロード中..."
-            curl -L "$JAR_URL" -o "version.jar"
+            curl --connect-timeout 10 --retry 3 --retry-delay 5 -L "$JAR_URL" -o "$version.jar"
+
             
             # 5. GitHub Release の作成とJARの添付を同時に実行！
             echo "    [Release] GitHubにリリースを作成して version.jar をアップロード中..."
