@@ -99,7 +99,7 @@ jobs:
           release:$LATEST_RELEASE
           snapshot:$LATEST_SNAPSHOT
           EOF
-          unzip $LATEST_RELEASE.jar -d ./$LATEST_RELEASE/
+          unzip release/$LATEST_RELEASE.jar -d ./$LATEST_RELEASE/
       - name: 6. メインリポジトリへ自動コミット＆プッシュ
         run: |
           git config --local user.email "action@github.com"
