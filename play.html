@@ -34,10 +34,23 @@
     const libLines = (await libResponse.text()).split('\n').filter(l => l.trim() !== "");
 
     // 4. メインJARとライブラリを全てメモリにロード
+        // 4. 改修：Promise.all (並列) ではなく、for...of (直列) で一つずつロードする
     const mainJarUrl = await getBlobUrl("/MCJE/release/26.2.jar");
-    const libUrls = await Promise.all(libLines.map(line => {
+    
+    const libUrls = [];
+    for (const line of libLines) {
         const filename = line.split('/').pop();
-        return getBlobUrl("/MCJE/lib/" + filename);
+        console.log("Loading library: " + filename);
+        
+        try {
+            const url = await getBlobUrl("/MCJE/lib/" + filename);
+            libUrls.push(url);
+        } catch (e) {
+            console.error("Failed to load: " + filename, e);
+        }
+        // ここで少し待機を入れるのも手だが、まずは直列化だけで様子を見る
+    }
+
     }));
 
     // 5. クラスパスを連結 (メインJAR : lib1 : lib2 ...)
