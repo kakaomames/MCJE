@@ -1,0 +1,86 @@
+name: MineCraft JavaEdition Setup (To Releases)
+
+on:
+  workflow_dispatch: # ボタン一発で手動起動！
+
+permissions:
+  contents: write # リリースを作成・編集するために必須！
+
+jobs:
+  sync-to-releases:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 2. Minecraft公式サーバーからマニフェストを救出
+        run: |
+          curl -s https://mojang.com -o "MCJE_version_manifest_raw.json"
+          jq . MCJE_version_manifest_raw.json > MCJE_version_manifest.json
+
+      - name: 3. 未作成のバージョンを検知してReleasesへ自動投稿！
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # ghコマンド用の認証トークン
+        run: |
+          # 1. 念のため最新の20件程度を対象にループ（全件だと初回に何百件も走ってエラーになるため制限）
+          # ※最初は少なめでテストし、徐々に件数を増やすのが安全です
+          VERSION_LIST=$(jq -r '.versions[0:20][] | .id' MCJE_version_manifest.json)
+          
+          # 現在のリポジトリに存在するリリース（タグ一覧）を gh コマンドで取得
+          EXISTING_RELEASES=$(gh release list --limit 100 | awk '{print $1}')
+
+          for VERSION in $VERSION_LIST; do
+            # GitHubのタグ名として使う文字列（例: v26.2）
+            TAG_NAME="v$VERSION"
+            
+            # すでにそのリリースタグが存在するかチェック
+            if echo "$EXISTING_RELEASES" | grep -q "^$TAG_NAME$"; then
+              echo "[-] $TAG_NAME は既にリリース済みのためスキップします。"
+              continue
+            fi
+            
+            echo "[+] 新着バージョンを発見: $TAG_NAME の処理を開始します"
+
+            # 2. バージョンごとの詳細JSONのURLを抽出
+            DETAILS_URL=$(jq -r --arg ver "$VERSION" '.versions[] | select(.id == $ver) | .url' MCJE_version_manifest.json)
+            curl -s "$DETAILS_URL" -o details.json
+            
+            # 3. クライアント用JARのURLを抽出
+            JAR_URL=$(jq -r '.downloads.client.url' details.json)
+            TYPE=$(jq -r '.type' details.json)
+            
+            # 古いバージョンなどでJARがない場合はスキップ
+            if [ "$JAR_URL" == "null" ] || [ -z "$JAR_URL" ]; then
+              echo "    [!] JARのダウンロードURLが見つからないためスキップします。"
+              continue
+            fi
+            
+            # 4. JARをダウンロード
+            echo "    [DL] $JAR_URL からダウンロード中..."
+            curl -L "$JAR_URL" -o "version.jar"
+            
+            # 5. GitHub Release の作成とJARの添付を同時に実行！
+            echo "    [Release] GitHubにリリースを作成して version.jar をアップロード中..."
+            gh release create "$TAG_NAME" "version.jar" \
+              --title "Minecraft $VERSION ($TYPE)" \
+              --notes "Minecraft $TYPE バージョン $VERSION の自動バックアップです。"
+              
+            # 連続でAPIを叩きすぎないように少し休憩（2秒）
+            sleep 2
+          done
+
+      - name: 4. マニフェストだけメインリポジトリへ自動コミット＆プッシュ
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action [Bot]"
+          
+          # JARはリリースに逃がしたので、JSONファイルだけをGitに記録
+          git add MCJE_version_manifest.json
+          
+          if ! git diff --cached --quiet; then
+            git commit -m "VALUE_CHANGE: マニフェストファイルの更新 [skip ci]"
+            git push origin main
+          else
+            echo "マニフェストに変更はありません。"
+          fi
