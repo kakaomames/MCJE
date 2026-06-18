@@ -16,6 +16,45 @@
     await cheerpjInit();
     cheerpjCreateDisplay(800, 600);
 
+    // 1. lib_url.txt を取得
+    const response = await fetch('/MCJE/lib_url.txt');
+    const text = await response.text();
+
+    // 2. 改行をセミコロンに置換し、URLベースを /app/MCJE/lib/ に置換
+    // ※ ここで変換ルールを適用する
+    const classpath = text
+      .split('\n')
+      .filter(line => line.trim() !== "") // 空行を除去
+      .map(line => {
+          // ベースURLを削って /app/MCJE/lib/ に変換
+          const filename = line.split('/').pop();
+          return "/app/MCJE/lib/" + filename;
+      })
+      .join(':'); // CheerpJの区切り文字はコロン(:)
+
+    // 3. メインのJARも連結
+    const finalClasspath = "/app/MCJE/release/26.2.jar:" + classpath;
+
+    console.log("生成されたクラスパス:", finalClasspath);
+
+    // 4. 実行
+    await cheerpjRunMain(
+      "net.minecraft.client.main.Main",
+      finalClasspath,
+      "--username", "PLAYER_NAME",
+      "--version", "26.2",
+      "--gameDir", "/app/MCJE/Minecraft",
+      "--assetsDir", "/app/MCJE/assets/",
+      "--assetIndex", "26.2"
+    );
+  })();
+</script>
+
+<!--script>
+  (async function () {
+    await cheerpjInit();
+    cheerpjCreateDisplay(800, 600);
+
     // 君のコマンドから読み取ったクラスパス
     // /app/ を忘れずに付ける
     const classpath = "/app/MCJE/release/26.2.jar:/app/MCJE/Minecraft/versions/26.2/26.2.json:/app/MCJE/lib/*";
@@ -39,7 +78,7 @@
   })();
 </script>
 
-    <!--script>
+    <!script>
       (async function () {
         await cheerpjInit();
         cheerpjCreateDisplay(800, 600);
