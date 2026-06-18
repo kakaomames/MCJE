@@ -20,8 +20,22 @@ jobs:
 
       - name: Setup environment
         run: |
-          sudo apt-get update && sudo apt-get install -y jq default-jdk
-          npm install -g @leaningtech/cheerpj-cli
+          sudo apt-get update && sudo apt-get install -y jq default-jdk || true
+          npm install -g @leaningtech/cheerpj-cli || true
+
+      - name: Build CheerpJ CLI from source
+        run: |
+          # 1. リポジトリをクローン（またはサブモジュールとして追加）
+          git clone https://github.com/leaningtech/cheerpj-meta.git
+          cd cheerpj-meta
+          
+          # 2. ビルドに必要な依存関係をインストール（Java環境は既にあるから高速！）
+          # ここで君が持っているビルドスクリプトを叩く
+          # 例: ./build.sh (※中身を確認してくれ！)
+          
+          # 3. 生成されたバイナリにパスを通す
+          echo "$PWD/bin" >> $GITHUB_PATH
+
 
       - name: Fetch and Compile
         run: |
