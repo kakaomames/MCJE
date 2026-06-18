@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Minecraft WebEdition - 実行中</title>
+    <script src="https://cjrtnc.leaningtech.com/3.0/loader.js"></script>
+</head>
+<body>
+    <div id="game-container"></div>
+    <script>
+        async function start() {
+            await cheerpjInit();
+            // 直接JARをロードして起動
+            cheerpjRunJar("./release/26.2.jar");
+        }
+        start();
+    </script>
+</body>
+</html>
