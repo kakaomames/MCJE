@@ -27,6 +27,8 @@ jobs:
         run: |
           jq . MCJE_version_manifest_raw.json > MCJE_version_manifest.json
           jq . details.json > detail.json
+          jq -r '.libraries[].downloads.artifact.url' details.json > lib_url.txt
+
           
       - name: 4. jqで整形！
         run: |
