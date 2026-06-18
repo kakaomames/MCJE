@@ -17,6 +17,7 @@ jobs:
       - name: 2. py実行
         run: |
           mkdir Minecraft && cd Minecraft && mkdir versions && cd versions && mkdir 26.2 && cd ../../
+          curl "https://piston-meta.mojang.com/v1/packages/4c3cd3500ce8b9ea104c358a784634fedb2a610f/26.2.json" -o "./Minecraft/versions/26.2/26.2.json
           python java.py
           
       - name: 6. メインリポジトリへ自動コミット＆プッシュ
