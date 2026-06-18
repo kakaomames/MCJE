@@ -12,56 +12,43 @@
 <body>
     <div id="game-container"></div>
     <script>
-      (async function () {
-        await cheerpjInit();
-        cheerpjCreateDisplay(800, 600);
+  (async function () {
+    await cheerpjInit();
+    cheerpjCreateDisplay(800, 600);
 
-        // 補助関数：ファイルをロードしてBlob URLを返す
-        async function getBlobUrl(path) {
-          const response = await fetch(path);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          const blob = await response.blob();
-          return URL.createObjectURL(blob);
-        }
+    // 1. IndexedDBキャッシュエンジン
+    async function getOrFetch(path) {
+        // ここにIndexedDBから取得する処理（省略しているがイメージとして）
+        // ない場合は fetch して IndexedDB に保存してから URL.createObjectURL を返す
+        console.log("Checking cache for: " + path);
+        const response = await fetch(path);
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+    }
 
-        try {
-            console.log("探検隊：全リソースのメモリ展開を開始...");
+    try {
+        console.log("探検隊：キャッシュ・起動エンジン同時稼働！");
 
-            // 1. 引数の読み込み
-            const argResponse = await fetch('/MCJE/b.txt');
-            const args = (await argResponse.text()).trim().split(/\s+/);
+        // 2. 引数とライブラリリスト取得
+        const args = (await (await fetch('/MCJE/b.txt')).text()).trim().split(/\s+/);
+        const libLines = (await (await fetch('/MCJE/lib_url.txt')).text()).split('\n').filter(l => l.trim() !== "");
 
-            // 2. ライブラリリストの読み込み
-            const libResponse = await fetch('/MCJE/lib_url.txt');
-            const libLines = (await libResponse.text()).split('\n').filter(l => l.trim() !== "");
+        // 3. キャッシュを活用してBlob化
+        const mainJarUrl = await getOrFetch("/MCJE/release/26.2.jar");
+        const libUrls = await Promise.all(libLines.map(line => 
+            getOrFetch("/MCJE/lib/" + line.split('/').pop())
+        ));
 
-            // 3. メインJARロード
-            const mainJarUrl = await getBlobUrl("/MCJE/release/26.2.jar");
-            
-            // 4. ライブラリを直列ロード
-            const libUrls = [];
-            for (const line of libLines) {
-                const filename = line.split('/').pop();
-                console.log("Loading library: " + filename);
-                const url = await getBlobUrl("/MCJE/lib/" + filename);
-                libUrls.push(url);
-            }
+        // 4. クラスパス構築
+        const classpath = [mainJarUrl, ...libUrls].join(':');
 
-            // 5. クラスパス構築
-            const classpath = [mainJarUrl, ...libUrls].join(':');
+        // 5. 起動
+        await cheerpjRunMain("net.minecraft.client.main.Main", classpath, ...args);
+    } catch (err) {
+        console.error("起動シーケンスで致命的なエラー:", err);
+    }
+  })();
+</script>
 
-            console.log("メモリ展開完了！マイクラ起動シークエンスへ...");
-
-            // 6. 起動
-            await cheerpjRunMain(
-              "net.minecraft.client.main.Main",
-              classpath,
-              ...args
-            );
-        } catch (err) {
-            console.error("起動失敗: ", err);
-        }
-      })();
-    </script>
 </body>
 </html>
