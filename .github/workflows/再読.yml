@@ -31,38 +31,22 @@ jobs:
           for VERSION in $VERSION_LIST; do
             TAG_NAME="v$VERSION"
             
-            # すでに存在すればスキップ
-            if [ -n "$EXISTING_RELEASES" ] && echo "$EXISTING_RELEASES" | grep -q "^$TAG_NAME$"; then
-              echo "[-] $TAG_NAME は既にリリース済みのためスキップします。"
-              continue
+             # 5. GitHub Releaseの作成、または既存リリースへの追加アップロード！
+            echo "    [Release] GitHubへの登録処理を開始します..."
+            
+            # 既にリリース（タグ）が存在するか、一撃で直接チェック
+            if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+              echo "    [!] $TAG_NAME は既に存在します。ファイルを上書きアップロードします。"
+              # すでにリリースがある場合は、既存のファイルを消して再アップロード（上書き）
+              gh release upload "$TAG_NAME" "$VERSION.jar" --clobber || \
+              (gh release delete-asset "$TAG_NAME" "$VERSION.jar" -y 2>/dev/null && gh release upload "$TAG_NAME" "$VERSION.jar")
+            else
+              echo "    [*] $TAG_NAME は未作成です。新規リリースを作成します。"
+              # リリースがない場合は、新規作成して添付
+              gh release create "$TAG_NAME" "$VERSION.jar" \
+                --title "Minecraft $VERSION ($TYPE)" \
+                --notes "Minecraft $TYPE バージョン $VERSION の自動バックアップです。"
             fi
-            
-            echo "[+] 新着バージョンを発見: $TAG_NAME の処理を開始します"
-
-            DETAILS_URL=$(jq -r --arg ver "$VERSION" '.versions[] | select(.id == $ver) | .url' MCJE_version_manifest.json)
-            curl -s "$DETAILS_URL" -o details.json
-            
-            JAR_URL=$(jq -r '.downloads.client.url' details.json)
-            TYPE=$(jq -r '.type' details.json)
-            
-            if [ "$JAR_URL" == "null" ] || [ -z "$JAR_URL" ]; then
-              echo "    [!] JARのダウンロードURLが見つからないためスキップします。"
-              continue
-            fi
-            
-            # 【★変更】保存するファイル名をバージョン名に変更（リトライ付き）
-            echo "    [DL] $JAR_URL から $VERSION.jar としてダウンロード中..."
-            curl --connect-timeout 10 --retry 3 --retry-delay 5 -L "$JAR_URL" -o "$VERSION.jar"
-            
-            # 【★変更】リリースに添付するファイル名も $VERSION.jar に変更！
-            echo "    [Release] GitHubにリリースを作成して $VERSION.jar をアップロード中..."
-            gh release create "$TAG_NAME" "$VERSION.jar" \
-              --title "Minecraft $VERSION ($TYPE)" \
-              --notes "Minecraft $TYPE バージョン $VERSION の自動バックアップです。" \
-              --clobber
-              
-            # 後片付け（次のループのために今回のjarを削除してディスクを空ける）
-            rm "$VERSION.jar"
             
             sleep 2
           done
