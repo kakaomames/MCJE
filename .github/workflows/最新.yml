@@ -42,7 +42,7 @@ jobs:
           download_jar() {
             local version=$1
             local target_dir=$2 # "release" または "snapshot"
-            local target_path="$target_dir/version.jar"
+            local target_path="$target_dir/$version.jar"
 
             # 各バージョンの詳細情報が入ったJSONのURLを抽出
             local details_url=$(jq -r --arg ver "$version" '.versions[] | select(.id == $ver) | .url' MCJE_version_manifest.json)
