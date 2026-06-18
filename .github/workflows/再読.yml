@@ -16,7 +16,7 @@ jobs:
 
       - name: 2. Minecraft公式サーバーからマニフェストを救出
         run: |
-          curl -s https://mojang.com -o "MCJE_version_manifest_raw.json"
+          curl -s https://launchermeta.mojang.com/mc/game/version_manifest.json -o "MCJE_version_manifest_raw.json"
           jq . MCJE_version_manifest_raw.json > MCJE_version_manifest.json
 
       - name: 3. 未作成のバージョンを検知してReleasesへ自動投稿！
@@ -28,7 +28,7 @@ jobs:
           VERSION_LIST=$(jq -r '.versions[0:20][] | .id' MCJE_version_manifest.json)
           
           # 現在のリポジトリに存在するリリース（タグ一覧）を gh コマンドで取得
-          EXISTING_RELEASES=$(gh release list --limit 100 | awk '{print $1}')
+          EXISTING_RELEASES=$(gh release list --limit 100 | awk '{print $1}' || echo "")
 
           for VERSION in $VERSION_LIST; do
             # GitHubのタグ名として使う文字列（例: v26.2）
