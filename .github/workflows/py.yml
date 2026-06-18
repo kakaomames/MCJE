@@ -16,7 +16,7 @@ jobs:
 
       - name: 2. py実行
         run: |
-          mkdir ./Minecraft/version/26.1/
+          mkdir ./Minecraft/versions/26.2/
           python java.py
           
       - name: 6. メインリポジトリへ自動コミット＆プッシュ
