@@ -12,8 +12,7 @@ import subprocess
 # 例 (Windows): r"\\192.168.1.50\Shared\minecraft"
 # 例 (Mac/Linux): "/Volumes/Shared/minecraft" や "/mnt/minecraft"
 LAN_MINECRAFT_DIR = r"./Minecraft"
-cmd1 = ["mkdir", "Minecraft"]
-subprocess.run(cmd1)
+
 VERSION = "26.2"
 ASSET_INDEX = "26.2"
 # --------------------------------------------------
