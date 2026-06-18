@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini programming隊 - 秘密基地</title>
+</head>
+<body>
+    <h1>隊員諸君、入隊試験だ。</h1>
+    <p>エンドラの復活に最低限必要なクリスタルの数は？(Java版知識)</p>
+    <input type="number" id="answer" placeholder="数値を入力">
+    <button onclick="check()">回答する</button>
+
+    <script>
+        async function check() {
+            const userAnswer = document.getElementById('answer').value.trim();
+            const response = await fetch('a.txt');
+            const correctAnswer = (await response.text()).trim();
+            if (userAnswer === correctAnswer) {
+                window.location.href = 'home.html';
+            } else {
+                alert("知識不足だ！出直してこい！");
+            }
+        }
+    </script>
+</body>
+</html>
