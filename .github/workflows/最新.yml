@@ -18,6 +18,7 @@ jobs:
         run: |
           rm -rf release && rm -rf snapshot && rm -rf Minecraft
           mkdir -p Minecraft release snapshot
+          cd Minecraft && mkdir versions && cd versions && mkdir 26.2 && cd ../../
 
       - name: 3. Minecraft公式サーバーからversion_manifest.jsonを直接救出！
         run: |
