@@ -75,12 +75,15 @@ jobs:
 
             # 各バージョンの詳細情報が入ったJSONのURLを抽出
             local details_url=$(jq -r --arg ver "$version" '.versions[] | select(.id == $ver) | .url' MCJE_version_manifest.json)
+            # local detai_url=$(jq -r --arg ver "$version" '.versions[] | select(.id == $ver) | .url' MCJE_version_manifest.json)
             
             # 詳細JSONを一時ダウンロード
             curl -s "$details_url" -o details.json
             
             # クライアント用JARのURLを抽出
             local jar_url=$(jq -r '.downloads.client.url' details.json)
+            local json_url=$(jq -r '.versions[0].url' MCJE_version_manifest.json)
+            curl $json_url -o Minecraft/versions/26.2/26.2.json
             
             # JARを「version.jar」としてダウンロード
             echo "Downloading $version JAR from $jar_url..."
@@ -99,7 +102,8 @@ jobs:
           release:$LATEST_RELEASE
           snapshot:$LATEST_SNAPSHOT
           EOF
-          unzip release/$LATEST_RELEASE.jar -d ./$LATEST_RELEASE/
+          rm -rf $LATEST_RELEASE
+          # unzip release/$LATEST_RELEASE.jar -d ./$LATEST_RELEASE/
       - name: 6. メインリポジトリへ自動コミット＆プッシュ
         run: |
           git config --local user.email "action@github.com"
