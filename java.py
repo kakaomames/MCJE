@@ -72,7 +72,7 @@ path_separator = ";" if platform.system() == "Windows" else ":"
 classpath = f"{client_jar}{path_separator}{libraries_dir}"
 
 # Javaコマンドのベース作成
-cmd2 = ["java", "-Xmx2G", "-cp", classpath, "net.minecraft.client.main.Main"]
+cmd = ["java", "-Xmx2G", "-cp", classpath, "net.minecraft.client.main.Main"]
 
 # 引数の解析と追加
 if "arguments" in data and "game" in data["arguments"]:
@@ -86,4 +86,4 @@ elif "minecraftArguments" in data:
     cmd.extend(arg_string.split(" "))
 
 print("Starting Cross-Platform Minecraft from LAN...")
-subprocess.run(cmd2)
+subprocess.run(cmd)
