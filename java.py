@@ -34,10 +34,10 @@ print(f"Device-Based Hardware UUID: {AUTH_UUID}")
 # --------------------------------------------------
 
 # 各種パスの自動組み立て
-json_path = os.path.join(LAN_MINECRAFT_DIR, "versions", VERSION, f"{VERSION}.json")
-client_jar = os.path.join(LAN_MINECRAFT_DIR, "versions", VERSION, f"{VERSION}.jar")
-libraries_dir = os.path.join(LAN_MINECRAFT_DIR, "libraries", "*")
-assets_dir = os.path.join(LAN_MINECRAFT_DIR, "assets")
+json_path = "Minecraft/versions/26.2/26.2.json"
+client_jar = "release/26.2.jar"
+libraries_dir = "lib/"
+assets_dir = "assets/
 
 
 # 44行目の「with open...」の直前にこれを貼り付けてください
