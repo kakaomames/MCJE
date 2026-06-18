@@ -15,7 +15,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 2. Buildフォルダがなければ自動作成
-        run: mkdir -p Minecraft release snapshot
+        run: |
+          rm -rf release && rm -rf snapshot && rm -rf Minecraft
+          mkdir -p Minecraft release snapshot
 
       - name: 3. Minecraft公式サーバーからversion_manifest.jsonを直接救出！
         run: |
