@@ -1,0 +1,1 @@
+--username PLAYER_NAME --version 26.2 --gameDir Minecraft --assetsDir assets/ --assetIndex 26.2 --uuid efb786c1-23d4-44e9-a732-b460c0983db5 --accessToken accessToken11
