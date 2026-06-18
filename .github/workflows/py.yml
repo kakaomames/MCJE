@@ -16,7 +16,7 @@ jobs:
 
       - name: 2. py実行
         run: |
-          mkdir -p Minecraft && cd Minecraft && mkdir versions && cd versions && mkdir 26.2 && cd ../../
+          mkdir -p Minecraft && cd Minecraft && mkdir -p versions && cd versions && mkdir -p 26.2 && cd ../../
           curl "https://piston-meta.mojang.com/v1/packages/4c3cd3500ce8b9ea104c358a784634fedb2a610f/26.2.json" -o "./Minecraft/versions/26.2/26.2.json"
           python java.py
           
