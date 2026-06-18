@@ -1,6 +1,7 @@
 name: Minecraft WE Auto-Build
 
 on:
+  workflow_dispatch: # ボタン一発で手動起動！
   push:
     branches: [ main ]
     # buildのコミットでループしないように除外
