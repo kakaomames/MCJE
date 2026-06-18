@@ -19,7 +19,7 @@ jobs:
           curl -s https://launchermeta.mojang.com/mc/game/version_manifest.json -o "MCJE_version_manifest_raw.json"
           jq . MCJE_version_manifest_raw.json > MCJE_version_manifest.json
 
-            - name: 3. 未作成のバージョンを検知してReleasesへ自動投稿！
+      - name: 3. 未作成のバージョンを検知してReleasesへ自動投稿！
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
