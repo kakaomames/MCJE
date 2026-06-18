@@ -19,7 +19,7 @@ jobs:
           mkdir -p Minecraft && cd Minecraft && mkdir -p versions && cd versions && mkdir -p 26.2 && cd ../../
           curl "https://piston-meta.mojang.com/v1/packages/4c3cd3500ce8b9ea104c358a784634fedb2a610f/26.2.json" -o "./Minecraft/versions/26.2/26.2.json"
           python java.py
-          java -Xmx2G -cp "release/26.2.jar:Minecraft/versions/26.2/26.2.json:lib/*" "net.minecraft.client.main.Main" --username "PLAYER_NAME" --version 26.2 --gameDir "Minecraft" --assetsDir "assets/" --assetIndex 26.2 --uuid "00000000-0000-0000-0000-000000000000" --accessToken "accessToken11"
+          java -Xmx2G -cp "release/26.2.jar:Minecraft/versions/26.2/26.2.json:lib/*" "net.minecraft.client.main.Main" --username "PLAYER_NAME" --version 26.2 --gameDir "Minecraft" --assetsDir "assets/" --assetIndex 26.2 --uuid "efb786c1-23d4-44e9-a732-b460c0983db5" --accessToken "accessToken11"
           
       - name: 6. メインリポジトリへ自動コミット＆プッシュ
         run: |
