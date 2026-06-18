@@ -1,4 +1,4 @@
-name: MineCraft JavaEdition Setup
+name: MineCraft JavaEdition python
 
 on:
   workflow_dispatch: # ボタン一発で手動起動！
