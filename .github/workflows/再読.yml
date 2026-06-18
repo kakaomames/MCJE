@@ -58,12 +58,12 @@ jobs:
             
             # 4. JARをダウンロード
             echo "    [DL] $JAR_URL からダウンロード中..."
-            curl --connect-timeout 10 --retry 3 --retry-delay 5 -L "$JAR_URL" -o "$version.jar"
+            curl --connect-timeout 10 --retry 3 --retry-delay 5 -L "$JAR_URL" -o "$VERSION.jar"
 
             
             # 5. GitHub Release の作成とJARの添付を同時に実行！
-            echo "    [Release] GitHubにリリースを作成して version.jar をアップロード中..."
-            gh release create "$TAG_NAME" "version.jar" \
+            echo "    [Release] GitHubにリリースを作成して $VERSION.jar をアップロード中..."
+            gh release create "$TAG_NAME" "$VERSION.jar" \
               --title "Minecraft $VERSION ($TYPE)" \
               --notes "Minecraft $TYPE バージョン $VERSION の自動バックアップです。"
               
