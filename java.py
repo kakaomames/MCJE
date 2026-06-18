@@ -36,7 +36,7 @@ print(f"Device-Based Hardware UUID: {AUTH_UUID}")
 # 各種パスの自動組み立て
 json_path = "Minecraft/versions/26.2/26.2.json"
 client_jar = "release/26.2.jar"
-libraries_dir = "lib/"
+libraries_dir = "lib/*"
 assets_dir = "assets/
 
 
