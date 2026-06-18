@@ -26,6 +26,7 @@ jobs:
       - name: 4. jqで整形！
         run: |
           jq . MCJE_version_manifest_raw.json > MCJE_version_manifest.json
+          jq . details.json > detail.json
           
       - name: 4. jqで整形！
         run: |
