@@ -31,25 +31,30 @@ jobs:
           for VERSION in $VERSION_LIST; do
             TAG_NAME="v$VERSION"
             
-             # 5. GitHub Releaseの作成、または既存リリースへの追加アップロード！
+                        # 5. GitHub Releaseの作成、または既存リリースへの追加アップロード！
             echo "    [Release] GitHubへの登録処理を開始します..."
             
-            # 既にリリース（タグ）が存在するか、一撃で直接チェック
             if gh release view "$TAG_NAME" >/dev/null 2>&1; then
               echo "    [!] $TAG_NAME は既に存在します。ファイルを上書きアップロードします。"
-              # すでにリリースがある場合は、既存のファイルを消して再アップロード（上書き）
-              gh release upload "$TAG_NAME" "$VERSION.jar" --clobber || \
-              (gh release delete-asset "$TAG_NAME" "$VERSION.jar" -y 2>/dev/null && gh release upload "$TAG_NAME" "$VERSION.jar")
+              
+              # 【★修正】ファイル名の前に「./」をつけ、ダブルクォーテーションで囲みます
+              gh release upload "$TAG_NAME" "./$VERSION.jar" --clobber || \
+              (gh release delete-asset "$TAG_NAME" "./$VERSION.jar" -y 2>/dev/null && gh release upload "$TAG_NAME" "./$VERSION.jar")
             else
               echo "    [*] $TAG_NAME は未作成です。新規リリースを作成します。"
-              # リリースがない場合は、新規作成して添付
-              gh release create "$TAG_NAME" "$VERSION.jar" \
+              
+              # 【★修正】新規作成側も念のため「./」をつけて囲みます
+              gh release create "$TAG_NAME" "./$VERSION.jar" \
                 --title "Minecraft $VERSION ($TYPE)" \
                 --notes "Minecraft $TYPE バージョン $VERSION の自動バックアップです。"
             fi
+              
+            # 後片付け（次のループのために今回のjarを削除してディスクを空ける）
+            rm "./$VERSION.jar"
             
             sleep 2
           done
+
 
 
       - name: 4. マニフェストだけメインリポジトリへ自動コミット＆プッシュ
