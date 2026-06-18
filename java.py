@@ -11,10 +11,11 @@ import subprocess
 # ※共有フォルダのパス形式はOSごとに異なるため、ご自身のマウント方法に合わせて指定してください
 # 例 (Windows): r"\\192.168.1.50\Shared\minecraft"
 # 例 (Mac/Linux): "/Volumes/Shared/minecraft" や "/mnt/minecraft"
-LAN_MINECRAFT_DIR = r"\\192.168.1.50\Shared\minecraft"
-
-VERSION = "1.20.4"
-ASSET_INDEX = "1.20"
+LAN_MINECRAFT_DIR = r"./Minecraft"
+cmd1 = ["mkdir", "Minecraft"]
+subprocess.run(cmd1)
+VERSION = "26.2"
+ASSET_INDEX = "26.2"
 # --------------------------------------------------
 
 # 1. どのOSでも動く方法で「デバイス名（ホスト名）」を取得
@@ -63,7 +64,7 @@ path_separator = ";" if platform.system() == "Windows" else ":"
 classpath = f"{client_jar}{path_separator}{libraries_dir}"
 
 # Javaコマンドのベース作成
-cmd = ["java", "-Xmx2G", "-cp", classpath, "net.minecraft.client.main.Main"]
+cmd2 = ["java", "-Xmx2G", "-cp", classpath, "net.minecraft.client.main.Main"]
 
 # 引数の解析と追加
 if "arguments" in data and "game" in data["arguments"]:
@@ -77,4 +78,4 @@ elif "minecraftArguments" in data:
     cmd.extend(arg_string.split(" "))
 
 print("Starting Cross-Platform Minecraft from LAN...")
-subprocess.run(cmd)
+subprocess.run(cmd2)
