@@ -1,0 +1,39 @@
+name: MineCraft JavaEdition Setup
+
+on:
+  workflow_dispatch: # ボタン一発で手動起動！
+
+permissions:
+  contents: write # リポジトリへの書き込み権限をフル解放！
+
+jobs:
+  sync-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 2. Buildフォルダがなければ自動作成
+        run: mkdir -p Minecraft
+
+      - name: 3. Minecraft公式サーバーからversion_manifest.jsonを直接救出！
+        run: |
+          curl -s https://launchermeta.mojang.com/mc/game/version_manifest.json -o "MCJE_version_manifest_raw.json"
+
+      - name: 4. jqで整形！
+        run: |
+          jq . MCJE_version_manifest_raw.json > MCJE_version_manifest.json
+          
+      - name: 5. メインリポジトリへ自動コミット＆プッシュ
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action [Bot]"
+          git add .
+          
+          if ! git diff --cached --quiet; then
+            git commit -m "VALUE_CHANGE: GitHub ActionによりMinecraft公式サーバーからリソースを自動摘出 [skip ci]"
+            git push origin main
+          else
+            echo "変更がありません。処理をスキップします。"
+          fi
