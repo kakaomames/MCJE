@@ -39,7 +39,7 @@ jobs:
 
       - name: Fetch and Compile
         run: |
-          bash setup.sh
+          bash start.sh
           cheerpj-cli release/26.2.jar -o dist/
           cp -r assets dist/
           cp index.html dist/
