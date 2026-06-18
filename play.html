@@ -11,7 +11,35 @@
 </head>
 <body>
     <div id="game-container"></div>
-    <script>
+<script>
+  (async function () {
+    await cheerpjInit();
+    cheerpjCreateDisplay(800, 600);
+
+    // 君のコマンドから読み取ったクラスパス
+    // /app/ を忘れずに付ける
+    const classpath = "/app/release/26.2.jar:/app/Minecraft/versions/26.2/26.2.json:/app/lib/*";
+    const mainClass = "net.minecraft.client.main.Main";
+
+    // コマンドライン引数を配列で渡す
+    const args = [
+        "--username", "PLAYER_NAME",
+        "--version", "26.2",
+        "--gameDir", "/app/Minecraft",
+        "--assetsDir", "/app/assets/",
+        "--assetIndex", "26.2",
+        "--uuid", "efb786c1-23d4-44e9-a732-b460c0983db5",
+        "--accessToken", "accessToken11"
+    ];
+
+    console.log("マイクラをフルスペックで起動中...");
+    
+    // クラスパスと引数を指定して実行
+    await cheerpjRunMain(mainClass, classpath, ...args);
+  })();
+</script>
+
+    <!--script>
       (async function () {
         await cheerpjInit();
         cheerpjCreateDisplay(800, 600);
@@ -27,7 +55,7 @@
       })();
     </script>
 
-    <!--script>
+    <--script>
         (async function () {
  
             await cheerpjInit();
