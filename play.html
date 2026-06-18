@@ -11,161 +11,57 @@
 </head>
 <body>
     <div id="game-container"></div>
-<script>
-  (async function () {
-    await cheerpjInit();
-    cheerpjCreateDisplay(800, 600);
-
-    // 1. 補助関数：ファイルをロードしてBlob URLを返す
-    async function getBlobUrl(path) {
-      const response = await fetch(path);
-      const blob = await response.blob();
-      return URL.createObjectURL(blob);
-    }
-
-    console.log("探検隊：全リソースのメモリ展開を開始...");
-
-    // 2. 引数の読み込み (b.txt)
-    const argResponse = await fetch('/MCJE/b.txt');
-    const args = (await argResponse.text()).trim().split(/\s+/);
-
-    // 3. ライブラリリストの読み込み (lib_url.txt)
-    const libResponse = await fetch('/MCJE/lib_url.txt');
-    const libLines = (await libResponse.text()).split('\n').filter(l => l.trim() !== "");
-
-    // 4. メインJARとライブラリを全てメモリにロード
-        // 4. 改修：Promise.all (並列) ではなく、for...of (直列) で一つずつロードする
-    const mainJarUrl = await getBlobUrl("/MCJE/release/26.2.jar");
-    
-    const libUrls = [];
-    for (const line of libLines) {
-        const filename = line.split('/').pop();
-        console.log("Loading library: " + filename);
-        
-        try {
-            const url = await getBlobUrl("/MCJE/lib/" + filename);
-            libUrls.push(url);
-        } catch (e) {
-            console.error("Failed to load: " + filename, e);
-        }
-        // ここで少し待機を入れるのも手だが、まずは直列化だけで様子を見る
-    }
-
-    }));
-
-    // 5. クラスパスを連結 (メインJAR : lib1 : lib2 ...)
-    const classpath = [mainJarUrl, ...libUrls].join(':');
-
-    console.log("メモリ展開完了！マイクラ起動シークエンスへ...");
-
-    // 6. 起動！
-    await cheerpjRunMain(
-      "net.minecraft.client.main.Main",
-      classpath,
-      ...args
-    );
-  })();
-</script>
-
-<!--script>
-  (async function () {
-    await cheerpjInit();
-    cheerpjCreateDisplay(800, 600);
-
-    // 1. lib_url.txt を取得
-    const response = await fetch('/MCJE/lib_url.txt');
-    const text = await response.text();
-
-    // 2. 改行をセミコロンに置換し、URLベースを /app/MCJE/lib/ に置換
-    // ※ ここで変換ルールを適用する
-    const classpath = text
-      .split('\n')
-      .filter(line => line.trim() !== "") // 空行を除去
-      .map(line => {
-          // ベースURLを削って /app/MCJE/lib/ に変換
-          const filename = line.split('/').pop();
-          return "/app/MCJE/lib/" + filename;
-      })
-      .join(':'); // CheerpJの区切り文字はコロン(:)
-
-    // 3. メインのJARも連結
-    const finalClasspath = "/app/MCJE/release/26.2.jar:" + classpath;
-
-    console.log("生成されたクラスパス:", finalClasspath);
-
-    // 4. 実行
-    await cheerpjRunMain(
-      "net.minecraft.client.main.Main",
-      finalClasspath,
-      "--username", "PLAYER_NAME",
-      "--version", "26.2",
-      "--gameDir", "/app/MCJE/Minecraft",
-      "--assetsDir", "/app/MCJE/assets/",
-      "--assetIndex", "26.2"
-    );
-  })();
-</script>
-
-<script>
-  (async function () {
-    await cheerpjInit();
-    cheerpjCreateDisplay(800, 600);
-
-    // 君のコマンドから読み取ったクラスパス
-    // /app/ を忘れずに付ける
-    const classpath = "/app/MCJE/release/26.2.jar:/app/MCJE/Minecraft/versions/26.2/26.2.json:/app/MCJE/lib/*";
-    const mainClass = "net.minecraft.client.main.Main";
-
-    // コマンドライン引数を配列で渡す
-    const args = [
-        "--username", "PLAYER_NAME",
-        "--version", "26.2",
-        "--gameDir", "/app/Minecraft",
-        "--assetsDir", "/app/assets/",
-        "--assetIndex", "26.2",
-        "--uuid", "efb786c1-23d4-44e9-a732-b460c0983db5",
-        "--accessToken", "accessToken11"
-    ];
-
-    console.log("マイクラをフルスペックで起動中...");
-    
-    // クラスパスと引数を指定して実行
-    await cheerpjRunMain(mainClass, classpath, ...args);
-  })();
-</script>
-
-    <!script>
+    <script>
       (async function () {
         await cheerpjInit();
         cheerpjCreateDisplay(800, 600);
 
-        // ルート（リポジトリ名フォルダ）からの相対パスを作る
-        // 例: /MCJE/release/26.2.jar
-        const path = window.location.pathname;
-        const repoRoot = path.substring(0, path.indexOf('/', 1));
-        const jarPath = repoRoot + "/release/26.2.jar";
+        // 補助関数：ファイルをロードしてBlob URLを返す
+        async function getBlobUrl(path) {
+          const response = await fetch(path);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const blob = await response.blob();
+          return URL.createObjectURL(blob);
+        }
 
-        console.log("Loading from: /app" + jarPath);
-        await cheerpjRunJar("/app" + jarPath);
+        try {
+            console.log("探検隊：全リソースのメモリ展開を開始...");
+
+            // 1. 引数の読み込み
+            const argResponse = await fetch('/MCJE/b.txt');
+            const args = (await argResponse.text()).trim().split(/\s+/);
+
+            // 2. ライブラリリストの読み込み
+            const libResponse = await fetch('/MCJE/lib_url.txt');
+            const libLines = (await libResponse.text()).split('\n').filter(l => l.trim() !== "");
+
+            // 3. メインJARロード
+            const mainJarUrl = await getBlobUrl("/MCJE/release/26.2.jar");
+            
+            // 4. ライブラリを直列ロード
+            const libUrls = [];
+            for (const line of libLines) {
+                const filename = line.split('/').pop();
+                console.log("Loading library: " + filename);
+                const url = await getBlobUrl("/MCJE/lib/" + filename);
+                libUrls.push(url);
+            }
+
+            // 5. クラスパス構築
+            const classpath = [mainJarUrl, ...libUrls].join(':');
+
+            console.log("メモリ展開完了！マイクラ起動シークエンスへ...");
+
+            // 6. 起動
+            await cheerpjRunMain(
+              "net.minecraft.client.main.Main",
+              classpath,
+              ...args
+            );
+        } catch (err) {
+            console.error("起動失敗: ", err);
+        }
       })();
     </script>
-
-    <--script>
-        (async function () {
- 
-            await cheerpjInit();
-            cheerpjCreateDisplay(800, 600);
-
-            // 3. 動的なパス解決
-            // 現在のURLからディレクトリパスを抽出
-            const path = window.location.pathname;
-            const dir = path.substring(0, path.lastIndexOf('/'));
-            const jarPath = `${window.location.origin}${dir}/release/26.2.jar`;
-
-            // 4. JARの実行 (/app/プレフィックスを付与してロード)
-            console.log("Loading JAR from: " + jarPath);
-            await cheerpjRunJar("/app" + jarPath);
-        })();
-    </script-->
 </body>
 </html>
