@@ -72,7 +72,7 @@ path_separator = ";" if platform.system() == "Windows" else ":"
 classpath = f"{client_jar}{path_separator}{libraries_dir}"
 
 # Javaコマンドのベース作成
-cmd = ["java", "-Xmx2G", "-cp", classpath, "net.minecraft.client.main.Main","--username",PLAYER_NAME,"--version",VERSION,"--gameDir",LAN_MINECRAFT_DIR,"--assetsDir",assets_dir]
+cmd = ["java", "-Xmx2G", "-cp", classpath, "net.minecraft.client.main.Main","--username",PLAYER_NAME,"--version",VERSION,"--gameDir",LAN_MINECRAFT_DIR,"--assetsDir",assets_dir,"--assetIndex",ASSET_INDEX,"--uuid",AUTH_UUID,"--accessToken","accessToken11"]
 
 # 引数の解析と追加
 if "arguments" in data and "game" in data["arguments"]:
