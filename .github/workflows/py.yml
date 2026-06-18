@@ -1,0 +1,32 @@
+name: MineCraft JavaEdition Setup
+
+on:
+  workflow_dispatch: # ボタン一発で手動起動！
+
+permissions:
+  contents: write # リポジトリへの書き込み権限をフル解放！
+
+jobs:
+  sync-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 2. py実行
+        run: |
+          python java.py
+          
+      - name: 6. メインリポジトリへ自動コミット＆プッシュ
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action [Bot]"
+          git add .
+          
+          if ! git diff --cached --quiet; then
+            git commit -m "VALUE_CHANGE: GitHub ActionによりMinecraft公式サーバーからリソースを自動摘出 [skip ci]"
+            git push origin main
+          else
+            echo "変更がありません。処理をスキップします。"
+          fi
