@@ -40,6 +40,15 @@ client_jar = os.path.join(LAN_MINECRAFT_DIR, "versions", VERSION, f"{VERSION}.ja
 libraries_dir = os.path.join(LAN_MINECRAFT_DIR, "libraries", "*")
 assets_dir = os.path.join(LAN_MINECRAFT_DIR, "assets")
 
+
+# 44行目の「with open...」の直前にこれを貼り付けてください
+print(f"[DEBUG] 探しているJSONの絶対パス: {os.path.abspath(json_path)}")
+parent_dir = os.path.dirname(json_path)
+if os.path.exists(parent_dir):
+    print(f"[DEBUG] フォルダは存在します。中身のファイル一覧: {os.listdir(parent_dir)}")
+else:
+    print(f"[DEBUG] エラー：そもそもフォルダ '{parent_dir}' が存在しません！")
+
 # JSONの読み込み
 with open(json_path, "r", encoding="utf-8") as f:
     data = json.load(f)
