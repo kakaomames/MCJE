@@ -12,11 +12,25 @@
 <body>
     <div id="game-container"></div>
     <script>
-        (async function () {
-            // 1. 初期化
-            await cheerpjInit();
+      (async function () {
+        await cheerpjInit();
+        cheerpjCreateDisplay(800, 600);
 
-            // 2. 画面領域の確保
+        // ルート（リポジトリ名フォルダ）からの相対パスを作る
+        // 例: /MCJE/release/26.2.jar
+        const path = window.location.pathname;
+        const repoRoot = path.substring(0, path.indexOf('/', 1));
+        const jarPath = repoRoot + "/release/26.2.jar";
+
+        console.log("Loading from: /app" + jarPath);
+        await cheerpjRunJar("/app" + jarPath);
+      })();
+    </script>
+
+    <!--script>
+        (async function () {
+ 
+            await cheerpjInit();
             cheerpjCreateDisplay(800, 600);
 
             // 3. 動的なパス解決
@@ -29,6 +43,6 @@
             console.log("Loading JAR from: " + jarPath);
             await cheerpjRunJar("/app" + jarPath);
         })();
-    </script>
+    </script-->
 </body>
 </html>
