@@ -28,6 +28,32 @@ jobs:
           jq . MCJE_version_manifest_raw.json > MCJE_version_manifest.json
           jq . details.json > detail.json
           jq -r '.libraries[].downloads.artifact.url' details.json > lib_url.txt
+          # 2. その場で libdl.sh を自動作成 (cat << 'EOF' を使います)
+          cat << 'EOF' > libdl.sh
+          #!/bin/bash
+          
+          # 保存先の lib/ フォルダを作成
+          mkdir -p lib
+          
+          # URL一覧を1行ずつ読み込んでダウンロード
+          while IFS= read -r url; do
+            # 空行や "null" が混ざっていたらスキップ
+            if [ -z "$url" ] || [ "$url" == "null" ]; then
+              continue
+            fi
+            
+            echo "[DL] $url"
+            
+            # URLの末尾（ファイル名）を自動抽出して lib/ に保存（リトライ付き）
+            curl --connect-timeout 10 --retry 3 --retry-delay 5 \
+              -L "$url" \
+              -o "lib/$(basename "$url")"
+              
+          done < lib_url.txt
+          EOF
+          
+          # 3. 作成した sh ファイルを実行！
+          bash libdl.sh
 
           
       - name: 4. jqで整形！
