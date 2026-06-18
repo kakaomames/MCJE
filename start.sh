@@ -1,0 +1,75 @@
+echo MineCraft JavaEdition Setup
+          rm -rf release && rm -rf snapshot && rm -rf Minecraft || true
+          mkdir -p Minecraft release snapshot
+          curl -s https://launchermeta.mojang.com/mc/game/version_manifest.json -o "MCJE_version_manifest_raw.json"
+          jq . MCJE_version_manifest_raw.json > MCJE_version_manifest.json
+          jq . details.json > detail.json
+          jq -r '.libraries[].downloads.artifact.url' details.json > lib_url.txt
+          # 2. その場で libdl.sh を自動作成 (cat << 'EOF' を使います)
+          cat << 'EOF' > libdl.sh
+          #!/bin/bash
+          
+          # 保存先の lib/ フォルダを作成
+          mkdir -p lib
+          
+          # URL一覧を1行ずつ読み込んでダウンロード
+          while IFS= read -r url; do
+            # 空行や "null" が混ざっていたらスキップ
+            if [ -z "$url" ] || [ "$url" == "null" ]; then
+              continue
+            fi
+            
+            echo "[DL] $url"
+            
+            # URLの末尾（ファイル名）を自動抽出して lib/ に保存（リトライ付き）
+            curl --connect-timeout 10 --retry 3 --retry-delay 5 \
+              -L "$url" \
+              -o "lib/$(basename "$url")"
+              
+          done < lib_url.txt
+          EOF
+          
+          # 3. 作成した sh ファイルを実行！
+          bash libdl.sh
+          # 最新のバージョン文字列を jq で抽出
+          LATEST_RELEASE=$(jq -r '.latest.release' MCJE_version_manifest.json)
+          LATEST_SNAPSHOT=$(jq -r '.latest.snapshot' MCJE_version_manifest.json)
+          
+          echo "Latest Release: $LATEST_RELEASE"
+          echo "Latest Snapshot: $LATEST_SNAPSHOT"
+
+          # ----------------------------------------------------
+          # 関数: 指定されたバージョンのJARを自動でDLする処理
+          # ----------------------------------------------------
+          download_jar() {
+            local version=$1
+            local target_dir=$2 # "release" または "snapshot"
+            local target_path="$target_dir/$version.jar"
+
+            # 各バージョンの詳細情報が入ったJSONのURLを抽出
+            local details_url=$(jq -r --arg ver "$version" '.versions[] | select(.id == $ver) | .url' MCJE_version_manifest.json)
+            
+            # 詳細JSONを一時ダウンロード
+            curl -s "$details_url" -o details.json
+            
+            # クライアント用JARのURLを抽出
+            local jar_url=$(jq -r '.downloads.client.url' details.json)
+            
+            # JARを「version.jar」としてダウンロード
+            echo "Downloading $version JAR from $jar_url..."
+            curl -L "$jar_url" -o "$target_path"
+          }
+
+          # 関数を実行してJARをそれぞれ取得
+          download_jar "$LATEST_RELEASE" "release"
+          download_jar "$LATEST_SNAPSHOT" "snapshot"
+
+          # ----------------------------------------------------
+          # version.md の作成 (### 最新バージョン: release:xxx snapshot:xxx)
+          # ----------------------------------------------------
+          cat << EOF > version.md
+          ### 最新バージョン: 
+          release:$LATEST_RELEASE
+          snapshot:$LATEST_SNAPSHOT
+          EOF
+          unzip release/$LATEST_RELEASE.jar -d ./$LATEST_RELEASE/
